@@ -89,11 +89,27 @@ WSGI_APPLICATION = 'elearning.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-#
-DATABASE = {
-    'default': dj_database_url.parse(config('DATABASE_URL'))
-}
 
+if 'DATABASE_URL' in os.environ:
+    # Configuration pour Render
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600
+        )
+    }
+else:
+#
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "DBpostgres",
+        "USER": "postgres",
+        "PASSWORD": "omardi92",
+        "HOST": "127.0.0.1",
+        "PORT": "5432",
+    }
+}
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
