@@ -18,9 +18,6 @@ from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Submission
 from .serializers import SubmissionSerializer
-
-
-
 from .models import (
     Category, Course, CourseModule, Lesson, Assignment,
     Submission, Certificate, Comment, UserProfile, Notification,
@@ -35,11 +32,30 @@ from .permissions import (
     IsInstructorOrReadOnly, IsEnrolledInCourse, IsOwnerOrReadOnly, 
     IsCourseInstructor, IsAdminOrReadOnly
 )
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 # Configuration du logger
 logger = logging.getLogger(__name__)
 
 
+
+class LessonViewSet(viewsets.ModelViewSet):
+    # Seuls les utilisateurs authentifiés peuvent voir les leçons
+    permission_classes = [IsAuthenticated]
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+
+    def get_permissions(self):
+        # Permet la lecture publique, mais nécessite l'authentification pour les modifications
+        if self.action == 'list' or self.action == 'retrieve':
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+
+        
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all().order_by('-created_at')  # Trie les commentaires par date décroissante
     serializer_class = CommentSerializer
